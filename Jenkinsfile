@@ -1,5 +1,19 @@
 pipeline {
     agent any
+    parameters{
+        string(name: 'DEV-CHANNEL', defaultValue: 'Lucas Braga', description: 'Channel in the case of pipeline failures')
+        string(name: 'QA-CHANNEL', defaultValue: 'Lucas Braga', description: 'Channel to notify new release to QA')
+        string(name: 'PR-CHANNEL', defaultValue: 'Lucas Braga', description: 'Channel for PR review')
+    }
+    triggers {
+        githubPullRequest {}
+    }
+    options {
+        timeout(time: 5, unit: 'MINUTES')
+    }
+    environment{
+
+    }
     stages {
         stage('Build') {
             steps {
@@ -20,13 +34,52 @@ pipeline {
                 '''
             }
         }
-        stage('Deliver') {
+        stage('Deliver Production') {
+            when{
+                branch 'main'
+            }
             steps {
                 echo 'Deliver....'
                 sh '''
-                echo "doing delivery stuff.."
+                echo "doing delivery stuff.. at production"
                 '''
             }
         }
+        stage('Deliver Homolog') {
+            when {
+                 tag "rc-*" 
+            }
+            steps {
+                echo 'Deliver....'
+                sh '''
+                echo "doing delivery stuff.. at homolog"
+                '''
+            }
+            post{
+                success{
+                    slackSend channel: '${params.QA-CHANNEL}', message: "New release available"
+                }
+            }
+        }
+        stage('Deliver Develop') {
+            when{
+                branch 'develop'
+            }
+            steps {
+                echo 'Deliver....'
+                sh '''
+                echo "doing delivery stuff.. at develop"
+                '''
+            }
+        }
+    }
+    post{
+        failure{
+            slackSend channel: '${params.DEV-CHANNEL}', message: "Build Started: ${env.JOB_NAME} ${env.BUILD_NUMBER} failed"
+        }
+        sucess{
+            slackSend channel: '${params.PR-CHANNEL}', message: "Build Started: ${env.JOB_NAME} ${env.BUILD_NUMBER} success"
+            // slackSend channel: '${params.PR-CHANNEL}', message: "Pull Request to review ${env.GIT_URL}, Jenkins build ${env.BUILD_URL}"
+        }        
     }
 }
