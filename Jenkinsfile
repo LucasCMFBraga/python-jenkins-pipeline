@@ -5,14 +5,8 @@ pipeline {
         string(name: 'QA-CHANNEL', defaultValue: 'Lucas Braga', description: 'Channel to notify new release to QA')
         string(name: 'PR-CHANNEL', defaultValue: 'Lucas Braga', description: 'Channel for PR review')
     }
-    triggers {
-        githubPullRequest {}
-    }
     options {
         timeout(time: 5, unit: 'MINUTES')
-    }
-    environment{
-
     }
     stages {
         stage('Build') {
@@ -77,7 +71,7 @@ pipeline {
         failure{
             slackSend channel: '${params.DEV-CHANNEL}', message: "Build Started: ${env.JOB_NAME} ${env.BUILD_NUMBER} failed"
         }
-        sucess{
+        success{
             slackSend channel: '${params.PR-CHANNEL}', message: "Build Started: ${env.JOB_NAME} ${env.BUILD_NUMBER} success"
             // slackSend channel: '${params.PR-CHANNEL}', message: "Pull Request to review ${env.GIT_URL}, Jenkins build ${env.BUILD_URL}"
         }        
