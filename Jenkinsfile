@@ -57,7 +57,7 @@ pipeline {
         }
         stage('Deliver Develop') {
             when{
-                branch 'develop'
+                branch 'origin/develop'
             }
             steps {
                 echo 'Deliver....'
@@ -72,7 +72,7 @@ pipeline {
             slackSend message: "Build Started: ${env.JOB_NAME} ${env.BUILD_NUMBER} failed"
         }
         success{
-            slackSend message: "Build Started: ${env.JOB_NAME} ${env.BUILD_NUMBER} success"
+            slackSend message: "Build Started: ${env.JOB_NAME} ${env.BUILD_NUMBER} success Pull Request to review ${env.GIT_URL},"
             // slackSend channel: '${params.PR-CHANNEL}', message: "Pull Request to review ${env.GIT_URL}, Jenkins build ${env.BUILD_URL}"
         }        
     }
