@@ -4,7 +4,7 @@ pipeline {
         timeout(time: 5, unit: 'MINUTES')
     }
     environment{
-        SLACK_CHANNEL = "Lucas Braga"
+        SLACK_CHANNEL = " Lucas Braga"
     }
     stages {
         stage('Build') {
