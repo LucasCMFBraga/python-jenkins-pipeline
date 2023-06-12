@@ -1,12 +1,10 @@
 pipeline {
     agent any
-    parameters{
-        string(name: 'DEV-CHANNEL', defaultValue: 'Lucas Braga', description: 'Channel in the case of pipeline failures')
-        string(name: 'QA-CHANNEL', defaultValue: 'Lucas Braga', description: 'Channel to notify new release to QA')
-        string(name: 'PR-CHANNEL', defaultValue: 'Lucas Braga', description: 'Channel for PR review')
-    }
     options {
         timeout(time: 5, unit: 'MINUTES')
+    }
+    environment{
+        SLACK_CHANNEL = "Lucas Braga"
     }
     stages {
         stage('Build') {
@@ -53,7 +51,7 @@ pipeline {
                     }
                     post{
                         success{
-                            slackSend message: "New release available"
+                            slackSend(message: "New release available")
                         }
                     }
                 }
@@ -73,14 +71,13 @@ pipeline {
     }
     post{
         failure{
-            slackSend message: "Build Started: ${env.JOB_NAME} ${env.BUILD_NUMBER} failed"
+            slackSend(message: "Build Started: ${env.JOB_NAME} View pipeline, ${env.RUN_DISPLAY_URL} failed", color: "danger")
         }
         success{
-            slackSend message: "Build Started: ${env.JOB_NAME} success Pull Request to review ${env.GIT_URL}, branch: ${env.BRANCH_NAME}, URLS, ${env.JOB_DISPLAY_URL}, ${env.RUN_DISPLAY_URL}, ${env.BUILD_URL}, ${env.JOB_URL}"
+            slackSend(message: "Build Started: ${env.JOB_NAME}, View pipeline, ${env.RUN_DISPLAY_URL} success", color: "good")
             script{
                 if (env.BRANCH_NAME.contains('PR')) {
-                    echo 'I only execute on the master branch'
-                    slackSend message: "Pull Request to review ${env.GIT_URL}, Jenkins build ${env.JOB_NAME}"
+                    slackSend(message: "Pull Request to review ${env.GIT_URL}/pulls, Jenkins build ${env.JOB_NAME}", color: "good")
                 }
             }
         }  
