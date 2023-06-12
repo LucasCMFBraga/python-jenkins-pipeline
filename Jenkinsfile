@@ -4,6 +4,7 @@ pipeline {
         timeout(time: 5, unit: 'MINUTES')
     }
     environment{
+        ACCESS_KEY = credentials('secret-key')
         SLACK_CHANNEL = " Lucas Braga"
     }
     stages {
@@ -38,6 +39,14 @@ pipeline {
                         echo "doing delivery stuff.. at production"
                         '''
                     }
+                    post{
+                        success{
+                            slackSend(channel: "${env.SLACK_CHANNEL}", message: "New release in the production", color: "good")
+                        }
+                        failure{
+                             slackSend(channel: "${env.SLACK_CHANNEL}", message: "Failed to deploy in the production", color: "danger")
+                        }
+                    }
                 }
                 stage('Homolog') {
                     when {
@@ -51,7 +60,10 @@ pipeline {
                     }
                     post{
                         success{
-                            slackSend(message: "New release available")
+                            slackSend(channel: "${env.SLACK_CHANNEL}", message: "New release available in the homolog", color: "good")
+                        }
+                        failure{
+                             slackSend(channel: "${env.SLACK_CHANNEL}", message: "Failed to deploy in the homolog", color: "danger")
                         }
                     }
                 }
@@ -71,13 +83,19 @@ pipeline {
     }
     post{
         failure{
-            slackSend(message: "Build Started: ${env.JOB_NAME} View pipeline, ${env.RUN_DISPLAY_URL} failed", color: "danger")
+            slackSend(channel: "${env.SLACK_CHANNEL}",
+            message: "Build Started: ${env.JOB_NAME} View pipeline, ${env.RUN_DISPLAY_URL} failed",
+            color: "danger")
         }
         success{
-            slackSend(channel: "${env.SLACK_CHANNEL}", message: "Build Started: ${env.JOB_NAME}, View pipeline, ${env.RUN_DISPLAY_URL} success", color: "good")
+            slackSend(channel: "${env.SLACK_CHANNEL}",
+            message: "Build Started: ${env.JOB_NAME}, View pipeline, ${env.RUN_DISPLAY_URL} success",
+            color: "good")
             script{
                 if (env.BRANCH_NAME.contains('PR')) {
-                    slackSend(message: "Pull Request to review ${env.GIT_URL}, Jenkins build ${env.JOB_NAME}", color: "good")
+                    slackSend(channel: "${env.SLACK_CHANNEL}",
+                    message: "Pull Request to review ${env.GIT_URL}, Jenkins build ${env.JOB_NAME}",
+                    color: "good")
                 }
             }
         }  
