@@ -28,42 +28,46 @@ pipeline {
                 '''
             }
         }
-        stage('Deliver Production') {
-            when{
-                branch 'main'
-            }
-            steps {
-                echo 'Deliver....'
-                sh '''
-                echo "doing delivery stuff.. at production"
-                '''
-            }
-        }
-        stage('Deliver Homolog') {
-            when {
-                 tag "rc-*" 
-            }
-            steps {
-                echo 'Deliver....'
-                sh '''
-                echo "doing delivery stuff.. at homolog"
-                '''
-            }
-            post{
-                success{
-                    slackSend message: "New release available"
+        stage('Deploy'){
+            parallel{
+                stage('Production') {
+                    when{
+                        branch 'main'
+                    }
+                    steps {
+                        echo 'Deliver....'
+                        sh '''
+                        echo "doing delivery stuff.. at production"
+                        '''
+                    }
                 }
-            }
-        }
-        stage('Deliver Develop') {
-            when{
-                branch 'develop'
-            }
-            steps {
-                echo 'Deliver....'
-                sh '''
-                echo "doing delivery stuff.. at develop"
-                '''
+                stage('Homolog') {
+                    when {
+                        tag "rc-*" 
+                    }
+                    steps {
+                        echo 'Deliver....'
+                        sh '''
+                        echo "doing delivery stuff.. at homolog"
+                        '''
+                    }
+                    post{
+                        success{
+                            slackSend message: "New release available"
+                        }
+                    }
+                }
+                stage('Develop') {
+                    when{
+                        branch 'develop'
+                    }
+                    steps {
+                        echo 'Deliver....'
+                        sh '''
+                        echo "doing delivery stuff.. at develop"
+                        '''
+                    }
+                }
             }
         }
     }
@@ -72,9 +76,14 @@ pipeline {
             slackSend message: "Build Started: ${env.JOB_NAME} ${env.BUILD_NUMBER} failed"
 
         }
-        success{
+         success{
             slackSend message: "Build Started: ${env.JOB_NAME} ${env.BUILD_NUMBER} success Pull Request to review ${env.GIT_URL}, branch: ${env.BRANCH_NAME}"
-            // slackSend channel: '${params.PR-CHANNEL}', message: "Pull Request to review ${env.GIT_URL}, Jenkins build ${env.BUILD_URL}"
-        }        
+            script{
+                if (env.BRANCH_NAME == 'master') {
+                    echo 'I only execute on the master branch'
+                // slackSend channel: '${params.PR-CHANNEL}', message: "Pull Request to review ${env.GIT_URL}, Jenkins build ${env.BUILD_URL}"
+                }
+            }
+        }  
     }
 }
