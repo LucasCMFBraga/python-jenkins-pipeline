@@ -1,5 +1,5 @@
 def test_simple():
     """
-    Test 3
+    Test 4
     """
     assert ''==''
