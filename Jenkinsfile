@@ -74,10 +74,10 @@ pipeline {
             slackSend(message: "Build Started: ${env.JOB_NAME} View pipeline, ${env.RUN_DISPLAY_URL} failed", color: "danger")
         }
         success{
-            slackSend(message: "Build Started: ${env.JOB_NAME}, View pipeline, ${env.RUN_DISPLAY_URL} success", color: "good")
+            slackSend(channel:'${env.SLACK_CHANNEL}' ,message: "Build Started: ${env.JOB_NAME}, View pipeline, ${env.RUN_DISPLAY_URL} success", color: "good")
             script{
                 if (env.BRANCH_NAME.contains('PR')) {
-                    slackSend(message: "Pull Request to review ${env.GIT_URL}/pulls, Jenkins build ${env.JOB_NAME}", color: "good")
+                    slackSend(message: "Pull Request to review ${env.GIT_URL}, Jenkins build ${env.JOB_NAME}", color: "good")
                 }
             }
         }  
