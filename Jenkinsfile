@@ -78,7 +78,6 @@ pipeline {
         success{
             slackSend message: "Build Started: ${env.JOB_NAME} success Pull Request to review ${env.GIT_URL}, branch: ${env.BRANCH_NAME}, URLS, ${env.JOB_DISPLAY_URL}, ${env.RUN_DISPLAY_URL}, ${env.BUILD_URL}, ${env.JOB_URL}"
             script{
-                def env.BRANCH_NAME
                 if (env.BRANCH_NAME.contains('PR')) {
                     echo 'I only execute on the master branch'
                     slackSend message: "Pull Request to review ${env.GIT_URL}, Jenkins build ${env.JOB_NAME}"
