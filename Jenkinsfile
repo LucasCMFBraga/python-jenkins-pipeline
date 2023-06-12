@@ -74,14 +74,14 @@ pipeline {
     post{
         failure{
             slackSend message: "Build Started: ${env.JOB_NAME} ${env.BUILD_NUMBER} failed"
-
         }
-         success{
-            slackSend message: "Build Started: ${env.JOB_NAME} ${env.BUILD_NUMBER} success Pull Request to review ${env.GIT_URL}, branch: ${env.BRANCH_NAME}"
+        success{
+            slackSend message: "Build Started: ${env.JOB_NAME} success Pull Request to review ${env.GIT_URL}, branch: ${env.BRANCH_NAME}, URLS, ${env.JOB_DISPLAY_URL}, ${env.RUN_DISPLAY_URL}, ${env.BUILD_URL}, ${env.JOB_URL}"
             script{
-                if (env.BRANCH_NAME == 'master') {
+                def env.BRANCH_NAME
+                if (env.BRANCH_NAME.contains('PR')) {
                     echo 'I only execute on the master branch'
-                // slackSend channel: '${params.PR-CHANNEL}', message: "Pull Request to review ${env.GIT_URL}, Jenkins build ${env.BUILD_URL}"
+                    slackSend message: "Pull Request to review ${env.GIT_URL}, Jenkins build ${env.JOB_NAME}"
                 }
             }
         }  
